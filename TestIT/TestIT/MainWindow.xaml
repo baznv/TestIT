@@ -1,0 +1,50 @@
+﻿<Window x:Class="TestIT.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TestIT"
+        mc:Ignorable="d"
+        Title="MainWindow"  
+        WindowStyle="None" ResizeMode="CanResizeWithGrip" AllowsTransparency="True" MouseDown="Window_MouseDown" 
+        BorderBrush="{StaticResource BlueBrush}" BorderThickness="1">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        
+        <ContentControl MouseDoubleClick="ContentControl_MouseDoubleClick" Grid.Row="0">
+            <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Top" LastChildFill="False" Background="#004EAB">
+                <Image DockPanel.Dock="Left" Margin="4" Source="Resources\Img\ShowPassword.png"/>
+                <Button x:Name="CloseButton" DockPanel.Dock="Right" KeyboardNavigation.IsTabStop="False" Width="40" Height="40" Template="{StaticResource SystemButton}" Click="CloseButton_Click" >
+                    <Image Source="Resources\Img\HidePassword.png" />
+                </Button>
+                <Button x:Name="MaximizeButton" DockPanel.Dock="Right" KeyboardNavigation.IsTabStop="False" Click="MaximizeClick" Width="40" Height="40" >
+                    <Button.Content>
+                        <Path  Stretch="Fill" Fill="#FF000000" Data="F1 M 18,23L 58,23L 58,53L 18,53L 18,23 Z M 54,31L 22,31L 22,49L 54,49L 54,31 Z "/>
+                    </Button.Content>
+
+                </Button>
+                <Button x:Name="MinimizeButton" DockPanel.Dock="Right" KeyboardNavigation.IsTabStop="False" Click="MinimizeWindow" Width="28" Height="28" >
+                    <Path  Stretch="Fill" Fill="Red" Data="M18,23 L58,23 L58,53 "/>
+                </Button>
+            </DockPanel>
+        </ContentControl>
+        <DockPanel Grid.Row="1" LastChildFill="True">
+            <Menu DockPanel.Dock="Top" VerticalAlignment="Top" Padding="4">
+                <MenuItem Header="Создать папку"/>
+                <MenuItem Header="Удалить папку"/>
+                <MenuItem Header="Загрузить файл"/>
+                <MenuItem Header="Скачать файл"/>
+                <MenuItem Header="Удалить файл"/>
+                <MenuItem Header="Переименовать"/>
+            </Menu>
+            <TreeView DockPanel.Dock="Left" Background="Yellow">
+                
+            </TreeView>
+            <TabPanel DockPanel.Dock="Right" Background="Green">
+            </TabPanel>
+        </DockPanel>
+    </Grid>
+</Window>
