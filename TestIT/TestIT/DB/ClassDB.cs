@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Data.SQLite;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using TestIT.Models;
 
 namespace TestIT.DB
 {
@@ -16,8 +20,6 @@ namespace TestIT.DB
 
         public static void Init()
         {
-            //string dir = AppDomain.CurrentDomain.BaseDirectory;
-            //string fullPathToDB = Path.Combine(dir, App.PathToDB);
             stringConnection = $"Data Source={fullPathToDB}; foreign keys=true; Version=3;";
 
             if (!File.Exists(fullPathToDB))
@@ -157,6 +159,35 @@ namespace TestIT.DB
 
             comm += ");";
             return comm;
+        }
+
+
+        internal static ObservableCollection<FolderM> GetData()
+        {
+            string comm = "SELECT * FROM folderm";
+
+            ObservableCollection<FolderM> result = new ObservableCollection<FolderM>();
+            using (SQLiteConnection conn = new SQLiteConnection(stringConnection))
+            {
+                SQLiteCommand command = new SQLiteCommand(conn);
+                command.CommandText = comm;
+
+                conn.Open();
+                using (SQLiteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        FolderM folderM = new FolderM();
+                        folderM.ID = reader.GetInt32(0);
+                        folderM.Name = reader.GetString(1);
+                        folderM.ParentFolderID = reader.GetInt32(2);
+
+                        result.Add(folderM);
+                    }
+                }
+                conn.Close();
+            }
+            return result;
         }
 
 

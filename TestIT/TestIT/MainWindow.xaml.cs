@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,11 +9,15 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+//using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Win32;
+using TestIT.DB;
+using TestIT.Models;
 
 namespace TestIT
 {
@@ -20,9 +26,15 @@ namespace TestIT
     /// </summary>
     public partial class MainWindow : Window
     {
+        public ObservableCollection<FolderM> Folders { get; set; }
+
         public MainWindow()
         {
             InitializeComponent();
+            ClassDB.Init();
+            Folders = ClassDB.GetData();
+            DataContext = this;
+            //treeView1.ItemsSource = Folders;
         }
 
         private void MinimizeWindow(object sender, RoutedEventArgs e)
@@ -63,5 +75,25 @@ namespace TestIT
                 App.Current.MainWindow.WindowState = WindowState.Maximized;
             }
         }
+
+        private void CreateFolder_Click(object sender, RoutedEventArgs e)
+        {
+            NameWindow nw = new NameWindow();
+            nw.ShowDialog();
+        }
     }
+
+
+    public class Folder
+    {
+        public string Name { get; set; }
+        public ObservableCollection<Folder> Folders { get; set; }
+        public ObservableCollection<FileFolder> Files { get; set; }
+    }
+
+    public class FileFolder
+    {
+        public string Name { get; set; }
+    }
+
 }

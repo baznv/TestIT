@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using TestIT.DB;
@@ -8,12 +10,55 @@ using TestIT.DB;
 namespace TestIT.Models
 {
     [Table]
-    class FolderM
+    public class FolderM : INotifyPropertyChanged
     {
+        private int id;
         [PrimaryKey]
-        public int ID { get; set; }
+        public int ID
+        {
+            get { return id; }
+            set
+            {
+                id = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string name;
         [NotNull]
-        public string Name { get; set; }
-        public int ParentFolderID { get; set; } 
+        public string Name
+        {
+            get { return name; }
+            set
+            {
+                name = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private int parentFolderID;
+        public int ParentFolderID
+        {
+            get { return parentFolderID; }
+            set
+            {
+                parentFolderID = value;
+                OnPropertyChanged();
+            }
+        }
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void OnPropertyChanged([CallerMemberName]string prop = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+        }
+
+        public override string ToString()
+        {
+            return String.Format($"{ID} {Name} {ParentFolderID}");
+        }
+
+
     }
 }

@@ -3,6 +3,9 @@
                     xmlns:local="clr-namespace:TestIT.Resources">
     
     <SolidColorBrush x:Key="BlueBrush" Color="#004EAB"/>
+    <SolidColorBrush x:Key="BlueBrush2" Color="#40FFFFFF"/>
+    <SolidColorBrush x:Key="BlueBrush3" Color="#80FFFFFF"/>
+
     <SolidColorBrush x:Key="LightGrayBrush" Color="#F6F7F7"/>
 
     <ControlTemplate x:Key="SystemButton" TargetType="Button">
@@ -12,10 +15,10 @@
         </Grid>
         <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="border" Property="Background" Value="White"/>
+                <Setter TargetName="border" Property="Background" Value="{StaticResource BlueBrush2}"/>
             </Trigger>
             <Trigger Property="IsPressed" Value="True">
-                <Setter TargetName="border" Property="Background" Value="Red"/>
+                <Setter TargetName="border" Property="Background" Value="{StaticResource BlueBrush3}"/>
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>

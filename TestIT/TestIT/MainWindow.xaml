@@ -4,11 +4,15 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestIT"
+        xmlns:convert="clr-namespace:TestIT.Converter"
         mc:Ignorable="d"
         Title="MainWindow"  
         WindowStyle="None" ResizeMode="CanResizeWithGrip" AllowsTransparency="True" MouseDown="Window_MouseDown" 
         BorderBrush="{StaticResource BlueBrush}" BorderThickness="1">
-    <Grid>
+    <Window.Resources>
+        <convert:FifthPartOfSizeConvert x:Key="FifthPartOfSize" />
+    </Window.Resources>
+    <Grid x:Name="TitleGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
             <RowDefinition />
@@ -16,35 +20,38 @@
         
         <ContentControl MouseDoubleClick="ContentControl_MouseDoubleClick" Grid.Row="0">
             <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Top" LastChildFill="False" Background="#004EAB">
-                <Image DockPanel.Dock="Left" Margin="4" Source="Resources\Img\ShowPassword.png"/>
-                <Button x:Name="CloseButton" DockPanel.Dock="Right" KeyboardNavigation.IsTabStop="False" Width="40" Height="40" Template="{StaticResource SystemButton}" Click="CloseButton_Click" >
-                    <Image Source="Resources\Img\HidePassword.png" />
+                <Image DockPanel.Dock="Left" Margin="4" Source="Resources\Img\unnamed.png"/>
+                <TextBlock Text="Explorer" VerticalAlignment="Center" Foreground="White" FontSize="16" Margin="10,0"/>
+                <Button x:Name="CloseButton" DockPanel.Dock="Right" KeyboardNavigation.IsTabStop="False" Template="{StaticResource SystemButton}" Click="CloseButton_Click" >
+                    <Image Source="Resources\Img\Close.png" />
                 </Button>
-                <Button x:Name="MaximizeButton" DockPanel.Dock="Right" KeyboardNavigation.IsTabStop="False" Click="MaximizeClick" Width="40" Height="40" >
-                    <Button.Content>
-                        <Path  Stretch="Fill" Fill="#FF000000" Data="F1 M 18,23L 58,23L 58,53L 18,53L 18,23 Z M 54,31L 22,31L 22,49L 54,49L 54,31 Z "/>
-                    </Button.Content>
-
+                <Button x:Name="MaximizeButton" DockPanel.Dock="Right" KeyboardNavigation.IsTabStop="False" Template="{StaticResource SystemButton}" Click="MaximizeClick" >
+                        <Image Source="Resources\Img\Maximize.png" />
                 </Button>
-                <Button x:Name="MinimizeButton" DockPanel.Dock="Right" KeyboardNavigation.IsTabStop="False" Click="MinimizeWindow" Width="28" Height="28" >
-                    <Path  Stretch="Fill" Fill="Red" Data="M18,23 L58,23 L58,53 "/>
+                <Button x:Name="MinimizeButton" DockPanel.Dock="Right" KeyboardNavigation.IsTabStop="False" Template="{StaticResource SystemButton}" Click="MinimizeWindow" >
+                    <Image Source="Resources\Img\Minimize.png" />
                 </Button>
             </DockPanel>
         </ContentControl>
         <DockPanel Grid.Row="1" LastChildFill="True">
             <Menu DockPanel.Dock="Top" VerticalAlignment="Top" Padding="4">
-                <MenuItem Header="Создать папку"/>
+                <MenuItem x:Name="CreateFolder" Header="Создать папку" Click="CreateFolder_Click" />
                 <MenuItem Header="Удалить папку"/>
-                <MenuItem Header="Загрузить файл"/>
+                <MenuItem x:Name="UploadFile" Header="Загрузить файл" />
                 <MenuItem Header="Скачать файл"/>
                 <MenuItem Header="Удалить файл"/>
                 <MenuItem Header="Переименовать"/>
             </Menu>
-            <TreeView DockPanel.Dock="Left" Background="Yellow">
-                
+            <TreeView x:Name="treeView1" DockPanel.Dock="Left" Background="Yellow" ItemsSource="{Binding Folders}"
+                      Width="{Binding ElementName=TitleGrid, Path=ActualWidth, Converter={StaticResource FifthPartOfSize}}">
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding Path=Folders}">
+                        <TextBlock Text="{Binding Name}" />
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
             </TreeView>
-            <TabPanel DockPanel.Dock="Right" Background="Green">
-            </TabPanel>
+            <TabControl DockPanel.Dock="Right" Background="Green" >
+            </TabControl>
         </DockPanel>
     </Grid>
 </Window>
