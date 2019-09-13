@@ -26,14 +26,16 @@ namespace TestIT
     /// </summary>
     public partial class MainWindow : Window
     {
-        public ObservableCollection<FolderM> Folders { get; set; }
+        //public ObservableCollection<FolderM> Folders { get; set; }
 
         public MainWindow()
         {
             InitializeComponent();
             ClassDB.Init();
-            Folders = ClassDB.GetData();
-            DataContext = this;
+
+            MainWindowVM mwvm = new MainWindowVM();
+            mwvm.Init();
+            DataContext = mwvm;
             //treeView1.ItemsSource = Folders;
         }
 
@@ -44,17 +46,21 @@ namespace TestIT
 
         private void MaximizeClick(object sender, RoutedEventArgs e)
         {
-            if (App.Current.MainWindow.WindowState == WindowState.Maximized)
-            {
-                App.Current.MainWindow.WindowState = WindowState.Normal;
-            }
-            else if (App.Current.MainWindow.WindowState == WindowState.Normal)
-            {
-                App.Current.MainWindow.WindowState = WindowState.Maximized;
-            }
+            ChangeSize();
         }
 
-        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        private void ContentControl_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            ChangeSize();
+        }
+
+        private void ChangeSize()
+        {
+            App.Current.MainWindow.WindowState = App.Current.MainWindow.WindowState == WindowState.Maximized ?
+                WindowState.Normal : WindowState.Maximized;
+        }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             App.Current.MainWindow.DragMove();
         }
@@ -64,36 +70,26 @@ namespace TestIT
             Application.Current.Shutdown();
         }
 
-        private void ContentControl_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            if (App.Current.MainWindow.WindowState == WindowState.Maximized)
-            {
-                App.Current.MainWindow.WindowState = WindowState.Normal;
-            }
-            else if (App.Current.MainWindow.WindowState == WindowState.Normal)
-            {
-                App.Current.MainWindow.WindowState = WindowState.Maximized;
-            }
-        }
 
-        private void CreateFolder_Click(object sender, RoutedEventArgs e)
-        {
-            NameWindow nw = new NameWindow();
-            nw.ShowDialog();
-        }
+        //private void CreateFolder_Click(object sender, RoutedEventArgs e)
+        //{
+        //    NameWindow nw = new NameWindow();
+        //    nw.ShowDialog();
+        //}
+
     }
 
 
-    public class Folder
-    {
-        public string Name { get; set; }
-        public ObservableCollection<Folder> Folders { get; set; }
-        public ObservableCollection<FileFolder> Files { get; set; }
-    }
+    //public class Node
+    //{
+    //    public string Name { get; set; }
+    //    public ObservableCollection<Node> Nodes { get; set; }
+    //    //public ObservableCollection<FileFolder> Files { get; set; }
+    //}
 
-    public class FileFolder
-    {
-        public string Name { get; set; }
-    }
+    //public class FileFolder
+    //{
+    //    public string Name { get; set; }
+    //}
 
 }

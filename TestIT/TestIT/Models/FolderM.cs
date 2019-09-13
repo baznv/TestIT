@@ -6,11 +6,12 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using TestIT.DB;
+using TestIT.Interfaces;
 
 namespace TestIT.Models
 {
     [Table]
-    public class FolderM : INotifyPropertyChanged
+    public class FolderM : INotifyPropertyChanged, IStorage
     {
         private int id;
         [PrimaryKey]
@@ -37,6 +38,7 @@ namespace TestIT.Models
         }
 
         private int parentFolderID;
+        [NotNull]
         public int ParentFolderID
         {
             get { return parentFolderID; }

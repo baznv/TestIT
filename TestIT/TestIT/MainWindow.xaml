@@ -5,10 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestIT"
         xmlns:convert="clr-namespace:TestIT.Converter"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         mc:Ignorable="d"
         Title="MainWindow"  
-        WindowStyle="None" ResizeMode="CanResizeWithGrip" AllowsTransparency="True" MouseDown="Window_MouseDown" 
-        BorderBrush="{StaticResource BlueBrush}" BorderThickness="1">
+        WindowStyle="None" ResizeMode="CanResizeWithGrip" AllowsTransparency="True"  
+        BorderBrush="{StaticResource BlueBrush}" BorderThickness="1" MouseLeftButtonDown="Window_MouseLeftButtonDown">
     <Window.Resources>
         <convert:FifthPartOfSizeConvert x:Key="FifthPartOfSize" />
     </Window.Resources>
@@ -33,24 +34,35 @@
                 </Button>
             </DockPanel>
         </ContentControl>
-        <DockPanel Grid.Row="1" LastChildFill="True">
+        <DockPanel Grid.Row="1" LastChildFill="True" Background="{StaticResource LightGrayBrush}">
             <Menu DockPanel.Dock="Top" VerticalAlignment="Top" Padding="4">
-                <MenuItem x:Name="CreateFolder" Header="Создать папку" Click="CreateFolder_Click" />
-                <MenuItem Header="Удалить папку"/>
+                <MenuItem x:Name="CreateFolder" Header="Создать папку" Command="{Binding CreateFolderCommand}" />
+                <MenuItem Header="Удалить папку" Command="{Binding DeleteFolderCommand}"/>
                 <MenuItem x:Name="UploadFile" Header="Загрузить файл" />
                 <MenuItem Header="Скачать файл"/>
                 <MenuItem Header="Удалить файл"/>
                 <MenuItem Header="Переименовать"/>
             </Menu>
-            <TreeView x:Name="treeView1" DockPanel.Dock="Left" Background="Yellow" ItemsSource="{Binding Folders}"
+            <TreeView x:Name="treeView" DockPanel.Dock="Left" BorderThickness="0" ItemsSource="{Binding Nodes}"
                       Width="{Binding ElementName=TitleGrid, Path=ActualWidth, Converter={StaticResource FifthPartOfSize}}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectedItemChanged">
+                        <i:InvokeCommandAction Command="{Binding TreeViewCommand}" CommandParameter="{Binding ElementName=treeView, Path=SelectedItem}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType="TreeViewItem">
+                        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                    </Style>
+                </TreeView.ItemContainerStyle>
                 <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding Path=Folders}">
-                        <TextBlock Text="{Binding Name}" />
+                    <HierarchicalDataTemplate ItemsSource="{Binding Nodes}" >
+                        <TextBlock Text="{Binding Storage.Name}" />
                     </HierarchicalDataTemplate>
                 </TreeView.ItemTemplate>
             </TreeView>
-            <TabControl DockPanel.Dock="Right" Background="Green" >
+            <TabControl DockPanel.Dock="Right" Margin="5,0,0,0" BorderThickness="0">
+                <TextBox Text="{Binding SelectedItem}" FontSize="24"/>
             </TabControl>
         </DockPanel>
     </Grid>

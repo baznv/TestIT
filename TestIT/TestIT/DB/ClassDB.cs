@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using TestIT.Interfaces;
 using TestIT.Models;
 
 namespace TestIT.DB
@@ -32,7 +33,6 @@ namespace TestIT.DB
                 else MessageBox.Show("Возникла ошибка при создании базы данных");
             }
         }
-
 
         private static void CreateTables()
         {
@@ -125,6 +125,36 @@ namespace TestIT.DB
             }
         }
 
+        public static void DeleteObject<T>(T obj)
+        {
+            Type type = typeof(T);
+            //List<string> fields = GetNameProperties(type);
+
+            PropertyInfo fi_id = type.GetProperty("ID");
+            int id = Convert.ToInt32(fi_id?.GetValue(obj));
+            //comm += $"SELECT last_insert_rowid();";
+
+            using (SQLiteConnection conn = new SQLiteConnection(stringConnection))
+            {
+                conn.Open();
+
+                SQLiteCommand command = new SQLiteCommand(conn);
+                command.CommandText = $"DELETE FROM {type.Name.ToLower()} WHERE id={id}";
+
+                try
+                {
+                    command.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+
+                conn.Close();
+            }
+
+        }
+
         private static List<string> GetNameProperties(Type type)
         {
             List<string> fields = new List<string>();
@@ -161,35 +191,62 @@ namespace TestIT.DB
             return comm;
         }
 
-
-        internal static ObservableCollection<FolderM> GetData()
+        internal static ObservableCollection<IStorage> GetData(int numberParent)
         {
-            string comm = "SELECT * FROM folderm";
+            ObservableCollection<IStorage> result = new ObservableCollection<IStorage>();
 
-            ObservableCollection<FolderM> result = new ObservableCollection<FolderM>();
             using (SQLiteConnection conn = new SQLiteConnection(stringConnection))
             {
-                SQLiteCommand command = new SQLiteCommand(conn);
-                command.CommandText = comm;
-
                 conn.Open();
-                using (SQLiteDataReader reader = command.ExecuteReader())
+                using (SQLiteTransaction transaction = conn.BeginTransaction())
                 {
-                    while (reader.Read())
-                    {
-                        FolderM folderM = new FolderM();
-                        folderM.ID = reader.GetInt32(0);
-                        folderM.Name = reader.GetString(1);
-                        folderM.ParentFolderID = reader.GetInt32(2);
+                    SQLiteCommand command = new SQLiteCommand(conn);
+                    command.Transaction = transaction;
 
-                        result.Add(folderM);
+                    command.CommandText = $"SELECT * FROM folderm WHERE parentfolderid={numberParent}"; ;
+                    using (SQLiteDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            FolderM folderM = new FolderM()
+                            {
+                                ID = Convert.ToInt32(reader[nameof(FolderM.ID).ToString()]),
+                                Name = reader[nameof(FolderM.Name).ToString()].ToString(),
+                                ParentFolderID = Convert.ToInt32(reader[nameof(FolderM.ParentFolderID).ToString()]),
+                            };
+                            result.Add(folderM);
+                        }
                     }
+
+                    command.CommandText = $"SELECT * FROM filem WHERE folderid={numberParent}"; ;
+                    using (SQLiteDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            FileM fileM = new FileM()
+                            {
+                                ID = Convert.ToInt32(reader[nameof(FileM.ID).ToString()]),
+                                Name = reader[nameof(FileM.Name).ToString()].ToString(),
+                                FolderID = Convert.ToInt32(reader[nameof(FileM.FolderID).ToString()]),
+                                Content = reader[nameof(FileM.Content).ToString()].ToString(),
+                                Description = reader[nameof(FileM.Description).ToString()].ToString(),
+                                FileExtentionID = Convert.ToInt32(reader[nameof(FileM.FileExtentionID).ToString()]),
+                            };
+                            result.Add(fileM);
+                        }
+                    }
+
+                    transaction.Commit();
                 }
                 conn.Close();
             }
             return result;
         }
 
+        internal static void SaveToDB<T>(T obj)
+        {
+            InsertRow(obj);
+        }
 
     }
 

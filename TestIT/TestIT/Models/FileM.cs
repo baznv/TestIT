@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TestIT.DB;
+using TestIT.Interfaces;
 
 namespace TestIT.Models
 {
     [Table]
-    public class FileM
+    public class FileM : IStorage
     {
         [PrimaryKey]
         public int ID { get; set; }

@@ -17,16 +17,16 @@ namespace TestIT
     /// <summary>
     /// Логика взаимодействия для NameWindow.xaml
     /// </summary>
-    public partial class NameWindow : Window
+    public partial class AddFolderWindow : Window
     {
-        public NameWindow()
+        public AddFolderWindow()
         {
             InitializeComponent();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            DialogResult = true;
+            DragMove();
         }
     }
 }
