@@ -191,7 +191,7 @@ namespace TestIT.DB
             return comm;
         }
 
-        internal static ObservableCollection<IStorage> GetData(int numberParent)
+        internal static ObservableCollection<IStorage> GetIStorages(int numberParent)
         {
             ObservableCollection<IStorage> result = new ObservableCollection<IStorage>();
 
@@ -242,6 +242,40 @@ namespace TestIT.DB
             }
             return result;
         }
+
+        internal static ObservableCollection<FileExtensionM> GetExtentions()
+        {
+            ObservableCollection<FileExtensionM> result = new ObservableCollection<FileExtensionM>();
+
+            using (SQLiteConnection conn = new SQLiteConnection(stringConnection))
+            {
+                conn.Open();
+                using (SQLiteTransaction transaction = conn.BeginTransaction())
+                {
+                    SQLiteCommand command = new SQLiteCommand(conn);
+                    command.Transaction = transaction;
+
+                    command.CommandText = $"SELECT * FROM fileextensionm; "; ;
+                    using (SQLiteDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            FileExtensionM extentionM = new FileExtensionM()
+                            {
+                                ID = Convert.ToInt32(reader[nameof(FileExtensionM.ID).ToString()]),
+                                TypeFile = reader[nameof(FileExtensionM.TypeFile).ToString()].ToString(),
+                                Icon = reader[nameof(FileExtensionM.Icon).ToString()].ToString(),
+                            };
+                            result.Add(extentionM);
+                        }
+                    }
+                    transaction.Commit();
+                }
+                conn.Close();
+            }
+            return result;
+        }
+
 
         internal static void SaveToDB<T>(T obj)
         {

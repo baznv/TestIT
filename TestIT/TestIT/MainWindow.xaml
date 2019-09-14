@@ -12,13 +12,14 @@
         BorderBrush="{StaticResource BlueBrush}" BorderThickness="1" MouseLeftButtonDown="Window_MouseLeftButtonDown">
     <Window.Resources>
         <convert:FifthPartOfSizeConvert x:Key="FifthPartOfSize" />
+        <convert:StringToImageConverter x:Key="StringToImage"/>
     </Window.Resources>
+    
     <Grid x:Name="TitleGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
             <RowDefinition />
         </Grid.RowDefinitions>
-        
         <ContentControl MouseDoubleClick="ContentControl_MouseDoubleClick" Grid.Row="0">
             <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Top" LastChildFill="False" Background="#004EAB">
                 <Image DockPanel.Dock="Left" Margin="4" Source="Resources\Img\unnamed.png"/>
@@ -34,16 +35,16 @@
                 </Button>
             </DockPanel>
         </ContentControl>
-        <DockPanel Grid.Row="1" LastChildFill="True" Background="{StaticResource LightGrayBrush}">
-            <Menu DockPanel.Dock="Top" VerticalAlignment="Top" Padding="4">
-                <MenuItem x:Name="CreateFolder" Header="Создать папку" Command="{Binding CreateFolderCommand}" />
+        <DockPanel Grid.Row="1" LastChildFill="True" Background="{StaticResource LightGrayBrush}" >
+            <Menu DockPanel.Dock="Top" VerticalAlignment="Top" Padding="4" FontSize="14">
+                <MenuItem Header="Создать папку" Command="{Binding CreateFolderCommand}" />
                 <MenuItem Header="Удалить папку" Command="{Binding DeleteFolderCommand}"/>
-                <MenuItem x:Name="UploadFile" Header="Загрузить файл" />
-                <MenuItem Header="Скачать файл"/>
-                <MenuItem Header="Удалить файл"/>
+                <MenuItem Header="Загрузить файл" Command="{Binding AddFileCommand}"/>
+                <MenuItem Header="Скачать файл" Command="{Binding DownloadFileCommand}"/>
+                <MenuItem Header="Удалить файл" Command="{Binding DeleteFileCommand}"/>
                 <MenuItem Header="Переименовать"/>
             </Menu>
-            <TreeView x:Name="treeView" DockPanel.Dock="Left" BorderThickness="0" ItemsSource="{Binding Nodes}"
+            <TreeView x:Name="treeView" DockPanel.Dock="Left" BorderThickness="0" FontSize="14" ItemsSource="{Binding Nodes}"
                       Width="{Binding ElementName=TitleGrid, Path=ActualWidth, Converter={StaticResource FifthPartOfSize}}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectedItemChanged">
@@ -57,12 +58,34 @@
                 </TreeView.ItemContainerStyle>
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate ItemsSource="{Binding Nodes}" >
-                        <TextBlock Text="{Binding Storage.Name}" />
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel.ToolTip>
+                                <Label Content="{Binding Storage.Description}" FontSize="14"/>
+                            </StackPanel.ToolTip>
+                            <Image >
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <Setter Property="Source" Value="Resources\Img\closefolder-24.png"/>
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsExpanded}" Value="True">
+                                                <Setter Property="Source" Value="Resources\Img\openfolder-26.png"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Extension.Icon}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+                            <Image Source="{Binding Extension.Icon, Converter={StaticResource StringToImage}}"/>
+                            <TextBlock Text="{Binding Storage.Name}" Margin="10,0,0,0" FontSize="16" Padding="0" />
+                            <TextBlock Text="{Binding Extension.TypeFile}" Margin="0" FontSize="16" Padding="0" />
+                        </StackPanel>
                     </HierarchicalDataTemplate>
                 </TreeView.ItemTemplate>
             </TreeView>
             <TabControl DockPanel.Dock="Right" Margin="5,0,0,0" BorderThickness="0">
-                <TextBox Text="{Binding SelectedItem}" FontSize="24"/>
             </TabControl>
         </DockPanel>
     </Grid>

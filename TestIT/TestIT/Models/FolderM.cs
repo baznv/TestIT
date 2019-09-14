@@ -60,7 +60,5 @@ namespace TestIT.Models
         {
             return String.Format($"{ID} {Name} {ParentFolderID}");
         }
-
-
     }
 }

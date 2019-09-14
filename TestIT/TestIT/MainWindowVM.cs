@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -28,8 +29,20 @@ namespace TestIT
             }
         }
 
+        private ObservableCollection<FileExtensionM> extentions;
+        public ObservableCollection<FileExtensionM> Extentions
+        {
+            get { return extentions; }
+            set
+            {
+                extentions = value;
+                OnPropertyChanged();
+            }
+        }
+
         public void Init()
         {
+            Extentions = ClassDB.GetExtentions();
             Nodes = GetLevel(0);
             Load();
         }
@@ -55,56 +68,50 @@ namespace TestIT
         {
             ObservableCollection<Node> temp = new ObservableCollection<Node>();
 
-            var foldersAndFiles = ClassDB.GetData(parentId);
+            var foldersAndFiles = ClassDB.GetIStorages(parentId);
             foreach (var item in foldersAndFiles)
             {
                 Node node;
                 if (item is FolderM)
                     node = new Node() { IsSelected = false, Storage = (item as FolderM) };
                 else if (item is FileM)
-                    node = new Node() { IsSelected = false, Storage = (item as FileM) };
+                    node = new Node() { IsSelected = false, Storage = (item as FileM), Extension=Extentions.FirstOrDefault(x => x.ID == (item as FileM).FileExtentionID) };
                 else node = new Node();
                 temp.Add(node);
             }
-
             return temp;
         }
 
-        private string nameNewFolder;
-        public string NameNewFolder
+        private FolderM newFolder = new FolderM();
+        public FolderM NewFolder
         {
-            get { return nameNewFolder; }
+            get { return newFolder; }
             set
             {
-                nameNewFolder = value;
+                newFolder = value;
                 OnPropertyChanged();
             }
         }
 
-        private Node selectedNode;
-        public Node SelectedNode
+        private FileM newFile = new FileM();
+        public FileM NewFile
         {
-            get { return selectedNode; }
+            get { return newFile; }
             set
             {
-                selectedNode = value;
+                newFile = value;
                 OnPropertyChanged();
             }
         }
 
-
-        private ICommand createFolderCommand;
-        public ICommand CreateFolderCommand
+        private FileExtensionM newFileExtension = new FileExtensionM();
+        public FileExtensionM NewFileExtension
         {
-            get
+            get { return newFileExtension; }
+            set
             {
-                return createFolderCommand ??
-                    (
-                    createFolderCommand = new Commands.RelayCommand(
-                        p => CreateFolder(),
-                        p => true
-                       )
-                    );
+                newFileExtension = value;
+                OnPropertyChanged();
             }
         }
 
@@ -122,52 +129,18 @@ namespace TestIT
             }
         }
 
-        //public bool IsSelectedItemFolder
-        //{
-        //    get
-        //    {
-        //        return (Nodes.FirstOrDefault(x => x.IsSelected == true)).Storage is FolderM;
-        //    }
-
-        //                set
-        //    {
-        //        selectedNode = value;
-        //        OnPropertyChanged();
-        //    }
-
-        //}
-
-        private ICommand deleteFolderCommand;
-        public ICommand DeleteFolderCommand
+        private bool isSaveToRoot;
+        public bool IsSaveToRoot
         {
             get
             {
-                return deleteFolderCommand ??
-                    (
-                    deleteFolderCommand = new Commands.RelayCommand(
-                        p => DeleteFolder(),
-                        p => CanDeleteFolder()
-                       )
-                    );
+                return isSaveToRoot;
             }
-        }
-
-        private bool CanDeleteFolder()
-        {
-            if (SelectedItem?.Storage is FolderM)
-                return true;
-            else
-                return false;
-        }
-
-        private void DeleteFolder()
-        {
-            //FolderM tmp = SelectedItem as FolderM;
-            //Node node = Nodes.FirstOrDefault(x => x.Storage.Equals(SelectedItem));
-            var t = SelectedItem;
-            ClassDB.DeleteObject(SelectedItem.Storage as FolderM);
-            Nodes.Remove(SelectedItem);
-            SelectedItem = null;
+            set
+            {
+                isSaveToRoot = value;
+                OnPropertyChanged();
+            }
         }
 
         private ICommand treeViewCommand;
@@ -179,8 +152,7 @@ namespace TestIT
                     (
                     treeViewCommand = new Commands.RelayCommand(
                         p => TreeView(p),
-                        p => true
-                       )
+                        p => true)
                     );
             }
         }
@@ -190,61 +162,18 @@ namespace TestIT
             SelectedItem = p as Node;
         }
 
-        private ICommand saveNameCommand;
-        public ICommand SaveNameCommand
+        private ICommand createFolderCommand;
+        public ICommand CreateFolderCommand
         {
             get
             {
-                return saveNameCommand ??
+                return createFolderCommand ??
                     (
-                    saveNameCommand = new Commands.RelayCommand(
-                        p => SaveName(p),
-                        p => true
-                       )
+                    createFolderCommand = new Commands.RelayCommand(
+                        p => CreateFolder(),
+                        p => true )
                     );
             }
-        }
-
-        private void SaveName(object p)
-        {
-            (p as Window).DialogResult = true;
-            Node node = SelectedItem;
-            FolderM folder = new FolderM() { Name = NameNewFolder };
-
-            if (node == null)
-            {
-                folder.ParentFolderID = 0;
-                Nodes.Add(new Node() { IsSelected = false, Storage = (IStorage)folder });
-            }
-            else
-            {
-                folder.ParentFolderID = (node.Storage as FolderM).ID;
-                Node tmp = FindNode(Nodes, folder);
-                tmp.Nodes.Add(new Node() { IsSelected = false, Storage = (IStorage)folder });
-            }
-
-            NameNewFolder = null;
-            ClassDB.SaveToDB(folder);
-        }
-
-        public Node FindNode(ObservableCollection<Node> nodes, IStorage storage)
-        {
-            foreach (Node node in nodes)
-            {
-                Node highScore;
-                if (storage is FolderM)
-                    highScore = (node.Storage as FolderM).ID == (storage as FolderM).ParentFolderID ? node : FindNode(node.Nodes, storage);
-                //else if (storage is FileM)
-                //    return (node.Storage as FileM).ID == (node.Storage as FileM).ParentFolderID ? node : FindNode(node.Nodes);
-                else
-                    highScore = null;
-
-                if (highScore != null)
-                {
-                    return highScore;
-                }
-            }
-            return null;
         }
 
         private void CreateFolder()
@@ -252,6 +181,268 @@ namespace TestIT
             AddFolderWindow nw = new AddFolderWindow();
             nw.DataContext = this;
             nw.ShowDialog();
+        }
+
+        private ICommand saveFolderCommand;
+        public ICommand SaveFolderCommand
+        {
+            get
+            {
+                return saveFolderCommand ??
+                    (
+                    saveFolderCommand = new Commands.RelayCommand(
+                        p => SaveFolder(p),
+                        p => true )
+                    );
+            }
+        }
+
+        private void SaveFolder(object p)
+        {
+            (p as Window).DialogResult = true;
+            Node node = SelectedItem;
+
+            if (IsSaveToRoot || node == null)
+            {
+                NewFolder.ParentFolderID = 0;
+                Nodes.Add(new Node() { Storage = NewFolder });
+            }
+            else
+            {
+                NewFolder.ParentFolderID = (node.Storage as FolderM).ID;
+                Node tmp = FindParentNode(Nodes, NewFolder);
+                tmp.Nodes.Add(new Node() { Storage = NewFolder });
+            }
+            ClassDB.SaveToDB(NewFolder);
+            NewFolder = null;
+        }
+
+        public Node FindParentNode(ObservableCollection<Node> nodes, IStorage storage)
+        {
+            Node findNode = null;
+            foreach (Node node in nodes)
+            {
+                if (storage is FolderM)
+                    findNode = (node.Storage as FolderM)?.ID == (storage as FolderM).ParentFolderID ? node : FindParentNode(node.Nodes, storage);
+                else if (storage is FileM)
+                    findNode = (node.Storage as FolderM)?.ID == (storage as FileM).FolderID ? node : FindParentNode(node.Nodes, storage);
+            }
+            return findNode;
+        }
+
+
+        private ICommand addFileCommand;
+        public ICommand AddFileCommand
+        {
+            get
+            {
+                return addFileCommand ??
+                    (
+                    addFileCommand = new Commands.RelayCommand(
+                        p => AddFile(),
+                        p => true
+                       )
+                    );
+            }
+        }
+
+        private void AddFile()
+        {
+            AddFileWindow afw = new AddFileWindow();
+            afw.DataContext = this;
+            afw.ShowDialog();
+        }
+
+        private ICommand loadIconCommand;
+        public ICommand LoadIconCommand
+        {
+            get
+            {
+                return loadIconCommand ??
+                    (
+                    loadIconCommand = new Commands.RelayCommand(
+                        p => LoadIcon(),
+                        p => true )
+                    );
+            }
+        }
+
+        private void LoadIcon()
+        {
+            string fullFilePath;
+            OpenFileDialog ofd = new OpenFileDialog();
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                fullFilePath = ofd.FileName;
+                byte[] fileBytes = File.ReadAllBytes(fullFilePath);
+                NewFileExtension.Icon = Convert.ToBase64String(fileBytes);
+            }
+        }
+
+        private ICommand loadFileCommand;
+        public ICommand LoadFileCommand
+        {
+            get
+            {
+                return loadFileCommand ??
+                    (
+                    loadFileCommand = new Commands.RelayCommand(
+                        p => LoadFile(),
+                        p => true )
+                    );
+            }
+        }
+
+        private void LoadFile()
+        {
+            string fullFilePath;
+            OpenFileDialog ofd = new OpenFileDialog();
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                fullFilePath = ofd.FileName;
+                string extension = Path.GetExtension(fullFilePath);
+                FileExtensionM fem = Extentions.FirstOrDefault(x => x.TypeFile == extension);
+                if (fem == null)
+                    NewFileExtension = new FileExtensionM() { TypeFile = extension };
+                else
+                    NewFileExtension = fem;
+                string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fullFilePath);
+
+                NewFile.Name = fileNameWithoutExtension;
+                NewFile.Content = File.ReadAllText(fullFilePath, Encoding.Default);
+            }
+        }
+
+        private ICommand saveFileCommand;
+        public ICommand SaveFileCommand
+        {
+            get
+            {
+                return saveFileCommand ??
+                    (
+                    saveFileCommand = new Commands.RelayCommand(
+                        p => SaveFile(p),
+                        p => true)
+                    );
+            }
+        }
+
+        private void SaveFile(object p)
+        {
+            (p as Window).DialogResult = true;
+
+            Node node = SelectedItem;
+
+            if (IsSaveToRoot || node == null)
+            {
+                NewFile.FolderID = 0;
+                Nodes.Add(new Node() { Storage = NewFile });
+            }
+            else
+            {
+                NewFile.FolderID = (node.Storage as FolderM).ID;
+                Node tmp = FindParentNode(Nodes, NewFile as FileM);
+                tmp.Nodes.Add(new Node() { Storage = NewFile });
+            }
+            if (NewFileExtension.ID == 0)
+                ClassDB.SaveToDB(NewFileExtension);
+            NewFile.FileExtentionID = NewFileExtension.ID;
+            ClassDB.SaveToDB(NewFile);
+            NewFile = null;
+            NewFileExtension = null;
+        }
+
+
+        private ICommand deleteFolderCommand;
+        public ICommand DeleteFolderCommand
+        {
+            get
+            {
+                return deleteFolderCommand ??
+                    (
+                    deleteFolderCommand = new Commands.RelayCommand(
+                        p => DeleteFolder(),
+                        p => IsSelectedItemFolder() )
+                    );
+            }
+        }
+
+        private bool IsSelectedItemFolder()
+        {
+            return SelectedItem?.Storage is FolderM;
+        }
+
+        private void DeleteFolder()
+        {
+            List<Node> lst = new List<Node>();
+
+
+            ClassDB.DeleteObject(SelectedItem.Storage as FolderM);
+
+            Node node = FindParentNode(Nodes, SelectedItem.Storage as FolderM);
+            if (node == null)
+                Nodes.Remove(SelectedItem);
+            else
+                node.Nodes.Remove(SelectedItem);
+            SelectedItem = null;
+        }
+
+        private ICommand deleteFileCommand;
+        public ICommand DeleteFileCommand
+        {
+            get
+            {
+                return deleteFileCommand ??
+                    (
+                    deleteFileCommand = new Commands.RelayCommand(
+                        p => DeleteFile(),
+                        p => IsSelectedItemFile())
+                    );
+            }
+        }
+
+        private bool IsSelectedItemFile()
+        {
+            return SelectedItem?.Storage is FileM;
+        }
+
+        private void DeleteFile()
+        {
+            //var t = SelectedItem;
+            ClassDB.DeleteObject(SelectedItem.Storage as FileM);
+            Nodes.Remove(SelectedItem);
+            SelectedItem = null;
+        }
+
+        
+        private ICommand downloadFileCommand;
+        public ICommand DownloadFileCommand
+        {
+            get
+            {
+                return downloadFileCommand ??
+                    (
+                    downloadFileCommand = new Commands.RelayCommand(
+                        p => DownloadFile(),
+                        p => IsSelectedItemFile())
+                    );
+            }
+        }
+
+        private void DownloadFile()
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.FileName = SelectedItem.Storage.Name;
+            sfd.DefaultExt = SelectedItem.Extension.TypeFile;
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                using (StreamWriter sw = new StreamWriter(sfd.OpenFile(), System.Text.Encoding.Default))
+                {
+                    sw.Write((SelectedItem.Storage as FileM).Content);
+                    sw.Close();
+                }
+            }
         }
 
 
@@ -265,6 +456,7 @@ namespace TestIT
     public class Node
     {
         public IStorage Storage { get; set; }
+        public FileExtensionM Extension { get; set; }
         public bool IsSelected { get; set; }
         public ObservableCollection<Node> Nodes { get; set; } = new ObservableCollection<Node>();
     }

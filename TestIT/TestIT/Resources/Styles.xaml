@@ -22,7 +22,13 @@
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
-    
+
+    <Style TargetType="ToolTip">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BlueBrush}"/>
+
+    </Style>
+
     <!--<Style x:Key="CloseButton" TargetType="Button">
         <Setter Property="Template" Value="{StaticResource SystemButton}"/>
         --><!--<Setter Property="Background" Value="Transparent"/>-->
