@@ -128,11 +128,9 @@ namespace TestIT.DB
         public static void DeleteObject<T>(T obj)
         {
             Type type = typeof(T);
-            //List<string> fields = GetNameProperties(type);
 
             PropertyInfo fi_id = type.GetProperty("ID");
             int id = Convert.ToInt32(fi_id?.GetValue(obj));
-            //comm += $"SELECT last_insert_rowid();";
 
             using (SQLiteConnection conn = new SQLiteConnection(stringConnection))
             {
@@ -154,6 +152,57 @@ namespace TestIT.DB
             }
 
         }
+
+        private static string GetRowUPDATE<T>(Type type, List<string> fields, int id)
+        {
+            string comm = $"UPDATE {type.Name.ToLower()} SET ";
+
+            for (int i = 0; i < fields.Count; i++)
+            {
+                if (i != 0)
+                    comm += ", ";
+                comm += $"{fields[i]} = @{fields[i]}";
+            }
+
+            comm += $" WHERE id={id};";
+            return comm;
+        }
+
+        public static void UpdateObject<T>(T obj)
+        {
+            Type type = typeof(T);
+            List<string> fields = GetNameProperties(type);
+            PropertyInfo fi_id = type.GetProperty("ID");
+            int id =  Convert.ToInt32(fi_id?.GetValue(obj));
+
+            string comm = GetRowUPDATE<T>(type, fields, id);
+
+            using (SQLiteConnection conn = new SQLiteConnection(stringConnection))
+            {
+                conn.Open();
+
+                SQLiteCommand command = new SQLiteCommand(conn);
+                command.CommandText = comm;
+
+                for (int i = 0; i < fields.Count; i++)
+                {
+                    PropertyInfo fi = type.GetProperty(fields[i]);
+                    command.Parameters.AddWithValue(fields[i], fi.GetValue(obj));
+                }
+                try
+                {
+                    command.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+
+                conn.Close();
+            }
+
+        }
+
 
         private static List<string> GetNameProperties(Type type)
         {
@@ -242,6 +291,77 @@ namespace TestIT.DB
             }
             return result;
         }
+
+        internal static ObservableCollection<FolderM> GetFolders(int numberParent)
+        {
+            ObservableCollection<FolderM> result = new ObservableCollection<FolderM>();
+
+            using (SQLiteConnection conn = new SQLiteConnection(stringConnection))
+            {
+                conn.Open();
+                using (SQLiteTransaction transaction = conn.BeginTransaction())
+                {
+                    SQLiteCommand command = new SQLiteCommand(conn);
+                    command.Transaction = transaction;
+
+                    command.CommandText = $"SELECT * FROM folderm WHERE parentfolderid={numberParent}"; ;
+                    using (SQLiteDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            FolderM folderM = new FolderM()
+                            {
+                                ID = Convert.ToInt32(reader[nameof(FolderM.ID).ToString()]),
+                                Name = reader[nameof(FolderM.Name).ToString()].ToString(),
+                                ParentFolderID = Convert.ToInt32(reader[nameof(FolderM.ParentFolderID).ToString()]),
+                            };
+                            result.Add(folderM);
+                        }
+                    }
+
+                    transaction.Commit();
+                }
+                conn.Close();
+            }
+            return result;
+        }
+
+        internal static ObservableCollection<FileM> GetFiles(int numberParent)
+        {
+            ObservableCollection<FileM> result = new ObservableCollection<FileM>();
+
+            using (SQLiteConnection conn = new SQLiteConnection(stringConnection))
+            {
+                conn.Open();
+                using (SQLiteTransaction transaction = conn.BeginTransaction())
+                {
+                    SQLiteCommand command = new SQLiteCommand(conn);
+                    command.Transaction = transaction;
+
+                    command.CommandText = $"SELECT * FROM filem WHERE folderid={numberParent}"; ;
+                    using (SQLiteDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            FileM fileM = new FileM()
+                            {
+                                ID = Convert.ToInt32(reader[nameof(FileM.ID).ToString()]),
+                                Name = reader[nameof(FileM.Name).ToString()].ToString(),
+                                FolderID = Convert.ToInt32(reader[nameof(FileM.FolderID).ToString()]),
+                                Content = reader[nameof(FileM.Content).ToString()].ToString(),
+                                Description = reader[nameof(FileM.Description).ToString()].ToString(),
+                                FileExtentionID = Convert.ToInt32(reader[nameof(FileM.FileExtentionID).ToString()]),
+                            };
+                            result.Add(fileM);
+                        }
+                    }
+                    transaction.Commit();
+                }
+                conn.Close();
+            }
+            return result;
+        }
+
 
         internal static ObservableCollection<FileExtensionM> GetExtentions()
         {

@@ -3,8 +3,10 @@
                     xmlns:local="clr-namespace:TestIT.Resources">
     
     <SolidColorBrush x:Key="BlueBrush" Color="#004EAB"/>
-    <SolidColorBrush x:Key="BlueBrush2" Color="#40FFFFFF"/>
-    <SolidColorBrush x:Key="BlueBrush3" Color="#80FFFFFF"/>
+    <SolidColorBrush x:Key="BlueBrushLight" Color="#CADBED"/>
+
+    <SolidColorBrush x:Key="WhiteBrush2" Color="#40FFFFFF"/>
+    <SolidColorBrush x:Key="WhiteBrush3" Color="#80FFFFFF"/>
 
     <SolidColorBrush x:Key="LightGrayBrush" Color="#F6F7F7"/>
 
@@ -15,10 +17,10 @@
         </Grid>
         <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="border" Property="Background" Value="{StaticResource BlueBrush2}"/>
+                <Setter TargetName="border" Property="Background" Value="{StaticResource WhiteBrush2}"/>
             </Trigger>
             <Trigger Property="IsPressed" Value="True">
-                <Setter TargetName="border" Property="Background" Value="{StaticResource BlueBrush3}"/>
+                <Setter TargetName="border" Property="Background" Value="{StaticResource WhiteBrush3}"/>
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
@@ -26,20 +28,88 @@
     <Style TargetType="ToolTip">
         <Setter Property="Background" Value="White"/>
         <Setter Property="BorderBrush" Value="{StaticResource BlueBrush}"/>
-
     </Style>
 
-    <!--<Style x:Key="CloseButton" TargetType="Button">
-        <Setter Property="Template" Value="{StaticResource SystemButton}"/>
-        --><!--<Setter Property="Background" Value="Transparent"/>-->
-        <!--<Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="White"/>
+    <Style TargetType="TabControl" >
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TabControl}">
+                    <Grid KeyboardNavigation.TabNavigation="Local">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" MinHeight="30"/>
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Disabled">
+                                    <Storyboard>
+                                        <ColorAnimationUsingKeyFrames Storyboard.TargetName="Border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
+                                            <EasingColorKeyFrame KeyTime="0" Value="#FFAAAAAA" />
+                                        </ColorAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <TabPanel x:Name="HeaderPanel" Grid.Row="0" Panel.ZIndex="1" Margin="3,0,4,0" IsItemsHost="True" KeyboardNavigation.TabIndex="1" />
+                        <Border x:Name="Border" Grid.Row="1" BorderThickness="1" SnapsToDevicePixels="True" KeyboardNavigation.TabNavigation="Local"
+                                            KeyboardNavigation.DirectionalNavigation="Contained" KeyboardNavigation.TabIndex="2" BorderBrush="{StaticResource LightGrayBrush}">
+                            <ContentPresenter x:Name="PART_SelectedContentHost" Margin="4" ContentSource="SelectedContent" />
+                        </Border>
+                        <Border Grid.Row="1" BorderThickness="0,2,0,0" BorderBrush="{StaticResource BlueBrush}" SnapsToDevicePixels="True"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="TabItem">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabItem">
+                    <Border Name="Border" BorderThickness="1,1,1,0"  Margin="1,0">
+                        <ContentPresenter x:Name="ContentSite" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ContentSource="Header" Margin="10,2" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource BlueBrush}" />
+                            <Setter Property="Foreground" Value="Black" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="False">
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource BlueBrushLight}" />
+                            <Setter Property="Foreground" Value="LightGray" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Button">
+        <Setter Property="Padding" Value="6"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Background" Value="{StaticResource BlueBrush}"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border CornerRadius="3" Background="{TemplateBinding Background}"/>
+                        <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <!--<Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource BlueBrushLight}"/>
             </Trigger>
             <Trigger Property="IsPressed" Value="True">
-                <Setter Property="Background" Value="Red"/>
+                <Setter Property="Background" Value="{StaticResource BlueBrushLight}"/>
+            </Trigger>-->
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Background" Value="{StaticResource BlueBrushLight}"/>
             </Trigger>
-        </Style.Triggers>--><!--
-    </Style>-->
+        </Style.Triggers>
+    </Style>
     
 </ResourceDictionary>

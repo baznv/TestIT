@@ -11,7 +11,7 @@
     
     <StackPanel Background="{StaticResource LightGrayBrush}">
         <Label Margin="15,30,15,0" Content="Введите имя папки:"/>
-        <TextBox Margin="15,0,15,15" Height="30" Text="{Binding NewFolder.Name}" VerticalContentAlignment="Center" Padding="4,0" />
+        <TextBox Margin="15,0,15,15" Height="30" Text="{Binding NewNode.Folder.Name}" VerticalContentAlignment="Center" Padding="4,0" />
         <CheckBox Margin="15,0,15,30" Content="Сохранить папку в корень" IsChecked="{Binding IsSaveToRoot}"/>
         <UniformGrid Columns="2" >
             <Button Margin="10" Content="Cancel" IsCancel="True" />

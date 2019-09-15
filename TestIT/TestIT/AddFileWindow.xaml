@@ -14,12 +14,13 @@
     </Window.Resources>
     <StackPanel Background="{StaticResource LightGrayBrush}">
         <DockPanel LastChildFill="True" Margin="10">
-            <Image DockPanel.Dock="Left" Source="{Binding NewFileExtension.Icon, Converter={StaticResource StringToImage}}" Width="24" >
+            <Image DockPanel.Dock="Left" Source="{Binding NewNode.Extension.Icon, Converter={StaticResource StringToImage}}" 
+                   Height="{Binding ElementName=nameStack, Path=ActualHeight}" >
                 <Image.Style>
                     <Style TargetType="Image">
                         <Setter Property="Visibility" Value="Visible"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding NewFileExtension.Icon}" Value="{x:Null}">
+                            <DataTrigger Binding="{Binding NewNode.Extension.Icon}" Value="{x:Null}">
                                 <Setter Property="Visibility" Value="Collapsed"/>
                             </DataTrigger>
                         </Style.Triggers>
@@ -28,9 +29,9 @@
             </Image>
 
             <Button DockPanel.Dock="Right" Content="Выбрать файл" Command="{Binding LoadFileCommand}"/>
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Margin="5,0">
-                <TextBlock Text="{Binding NewFile.Name}"/>
-                <TextBlock Text="{Binding NewFileExtension.TypeFile}"/>
+            <StackPanel Name="nameStack" Orientation="Horizontal" DockPanel.Dock="Left" Margin="5,0">
+                <TextBlock Text="{Binding NewNode.File.Name}"/>
+                <TextBlock Text="{Binding NewNode.Extension.TypeFile}"/>
             </StackPanel>
         </DockPanel>
 
@@ -39,7 +40,7 @@
                 <Style TargetType="Grid">
                     <Setter Property="Visibility" Value="Collapsed"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding NewFileExtension.Icon}" Value="{x:Null}">
+                        <DataTrigger Binding="{Binding NewNode.Extension.Icon}" Value="{x:Null}">
                             <Setter Property="Visibility" Value="Visible"/>
                         </DataTrigger>
                     </Style.Triggers>
@@ -50,7 +51,7 @@
         </Grid>
 
         <Label Content="Введите описание файла:" Margin="10,0"/>
-        <TextBox TextWrapping="Wrap" AcceptsReturn="True" Height="Auto" MinHeight="60" Margin="10,0" Text="{Binding NewFile.Description}"/>
+        <TextBox TextWrapping="Wrap" AcceptsReturn="True" Height="Auto" MinHeight="60" Margin="10,0" Text="{Binding NewNode.File.Description}"/>
         <CheckBox Margin="15,10,15,30" Content="Сохранить папку в корень" IsChecked="{Binding IsSaveToRoot}"/>
         <UniformGrid Columns="2" >
             <Button Margin="10" Content="Cancel" IsCancel="True" />

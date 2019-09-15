@@ -14,8 +14,8 @@
         <convert:FifthPartOfSizeConvert x:Key="FifthPartOfSize" />
         <convert:StringToImageConverter x:Key="StringToImage"/>
     </Window.Resources>
-    
-    <Grid x:Name="TitleGrid">
+
+    <Grid x:Name="TitleGrid" SnapsToDevicePixels="True">
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
             <RowDefinition />
@@ -28,65 +28,127 @@
                     <Image Source="Resources\Img\Close.png" />
                 </Button>
                 <Button x:Name="MaximizeButton" DockPanel.Dock="Right" KeyboardNavigation.IsTabStop="False" Template="{StaticResource SystemButton}" Click="MaximizeClick" >
-                        <Image Source="Resources\Img\Maximize.png" />
+                    <Image Source="Resources\Img\Maximize.png" />
                 </Button>
                 <Button x:Name="MinimizeButton" DockPanel.Dock="Right" KeyboardNavigation.IsTabStop="False" Template="{StaticResource SystemButton}" Click="MinimizeWindow" >
                     <Image Source="Resources\Img\Minimize.png" />
                 </Button>
             </DockPanel>
         </ContentControl>
-        <DockPanel Grid.Row="1" LastChildFill="True" Background="{StaticResource LightGrayBrush}" >
-            <Menu DockPanel.Dock="Top" VerticalAlignment="Top" Padding="4" FontSize="14">
+
+        <DockPanel Grid.Row="1" LastChildFill="True" Background="White" >
+            <Menu DockPanel.Dock="Top" VerticalAlignment="Top" Padding="8" FontSize="14">
                 <MenuItem Header="Создать папку" Command="{Binding CreateFolderCommand}" />
                 <MenuItem Header="Удалить папку" Command="{Binding DeleteFolderCommand}"/>
                 <MenuItem Header="Загрузить файл" Command="{Binding AddFileCommand}"/>
                 <MenuItem Header="Скачать файл" Command="{Binding DownloadFileCommand}"/>
                 <MenuItem Header="Удалить файл" Command="{Binding DeleteFileCommand}"/>
-                <MenuItem Header="Переименовать"/>
+                <MenuItem Header="Переименовать" Command="{Binding RenameCommand}"/>
             </Menu>
-            <TreeView x:Name="treeView" DockPanel.Dock="Left" BorderThickness="0" FontSize="14" ItemsSource="{Binding Nodes}"
-                      Width="{Binding ElementName=TitleGrid, Path=ActualWidth, Converter={StaticResource FifthPartOfSize}}">
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="SelectedItemChanged">
-                        <i:InvokeCommandAction Command="{Binding TreeViewCommand}" CommandParameter="{Binding ElementName=treeView, Path=SelectedItem}"/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-                <TreeView.ItemContainerStyle>
-                    <Style TargetType="TreeViewItem">
-                        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
-                    </Style>
-                </TreeView.ItemContainerStyle>
-                <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding Nodes}" >
-                        <StackPanel Orientation="Horizontal">
-                            <StackPanel.ToolTip>
-                                <Label Content="{Binding Storage.Description}" FontSize="14"/>
-                            </StackPanel.ToolTip>
-                            <Image >
-                                <Image.Style>
-                                    <Style TargetType="Image">
-                                        <Setter Property="Source" Value="Resources\Img\closefolder-24.png"/>
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsExpanded}" Value="True">
-                                                <Setter Property="Source" Value="Resources\Img\openfolder-26.png"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Extension.Icon}" Value="{x:Null}">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Image.Style>
-                            </Image>
-                            <Image Source="{Binding Extension.Icon, Converter={StaticResource StringToImage}}"/>
-                            <TextBlock Text="{Binding Storage.Name}" Margin="10,0,0,0" FontSize="16" Padding="0" />
-                            <TextBlock Text="{Binding Extension.TypeFile}" Margin="0" FontSize="16" Padding="0" />
-                        </StackPanel>
-                    </HierarchicalDataTemplate>
-                </TreeView.ItemTemplate>
-            </TreeView>
-            <TabControl DockPanel.Dock="Right" Margin="5,0,0,0" BorderThickness="0">
-            </TabControl>
+
+            <Grid DockPanel.Dock="Bottom" Height="35" Background="{StaticResource LightGrayBrush}"/>
+
+            <Grid DockPanel.Dock="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{Binding ElementName=TitleGrid, Path=ActualWidth, Converter={StaticResource FifthPartOfSize}}"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TreeView x:Name="treeView" Grid.Column="0" DockPanel.Dock="Left" BorderThickness="0" ItemsSource="{Binding Nodes}" >
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="SelectedItemChanged">
+                            <i:InvokeCommandAction Command="{Binding TreeViewCommand}" CommandParameter="{Binding ElementName=treeView, Path=SelectedItem}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding Nodes}" >
+                            <StackPanel Name="nameStack" Orientation="Horizontal" Margin="0,8,0,0">
+                                <Image Height="{Binding ElementName=nameStack, Path=ActualHeight}">
+                                    <Image.Style>
+                                        <Style TargetType="Image">
+                                            <Setter Property="Source" Value="Resources\Img\closefolder-24.png"/>
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsExpanded}" Value="True">
+                                                    <Setter Property="Source" Value="Resources\Img\openfolder-26.png"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Extension}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Image.Style>
+                                </Image>
+                                <Image Height="{Binding ElementName=nameStack, Path=ActualHeight}" Source="{Binding Extension.Icon, Converter={StaticResource StringToImage}}" />
+                                <TextBlock Text="{Binding Folder.Name}" Margin="10,4,0,0" FontSize="16" Padding="0" >
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Folder}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <TextBlock >
+                                    <TextBlock.ToolTip>
+                                        <ToolTip>
+                                            <ToolTip.Style>
+                                                <Style TargetType="ToolTip">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding File}" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Hidden"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </ToolTip.Style>
+                                            <Label Content="{Binding File.Description}" FontSize="14"/>
+                                        </ToolTip>
+                                    </TextBlock.ToolTip>
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding File}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                <TextBlock Text="{Binding File.Name}" Margin="10,0,0,0" FontSize="16" Padding="0" />
+                                <TextBlock Text="{Binding Extension.TypeFile}" Margin="-4,0,0,0" FontSize="16" Padding="0" />
+                            </TextBlock>
+                            </StackPanel>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+                <GridSplitter Grid.Column="1" ShowsPreview="False" Width="6" HorizontalAlignment="Center" VerticalAlignment="Stretch" Margin="0,10" Background="{StaticResource LightGrayBrush}"/>
+                <TabControl Grid.Column="2" DockPanel.Dock="Right" Margin="5,5,20,10" ItemsSource="{Binding OpenedFiles}" SelectedIndex="{Binding SelectedIndexOpenedFiles}">
+                    <TabControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Padding="0,5">
+                            <TextBlock Name="Nametb" Text="{Binding File.Name}" />
+                            <TextBlock Name="Exttb" Text="{Binding Extension.TypeFile}" />
+                        </TextBlock>
+                        </DataTemplate>
+                    </TabControl.ItemTemplate>
+                    <TabControl.ContentTemplate>
+                        <DataTemplate>
+                            <RichTextBox BorderBrush="Transparent" BorderThickness="0" VerticalScrollBarVisibility="Auto" IsReadOnly="True">
+                                <FlowDocument>
+                                    <Paragraph>
+                                        <Run Text="{Binding File.Content}" />
+                                    </Paragraph>
+                                </FlowDocument>
+                            </RichTextBox>
+                        </DataTemplate>
+                    </TabControl.ContentTemplate>
+                </TabControl>
+            </Grid>
         </DockPanel>
     </Grid>
 </Window>
