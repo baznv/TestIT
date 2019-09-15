@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
@@ -51,23 +52,25 @@ namespace TestIT
 
         async public void Load()
         {
-            var stack = new Stack<Node>(Nodes);
+            var queue = new Queue<Node>(Nodes);
 
-            while (stack.Any())
+            while (queue.Any())
             {
-                var next = stack.Pop();
+                var next = queue.Dequeue();
                 var temp = next.Folder;
                 if (temp != null)
                 {
-                    next.Nodes = GetLevel(temp.ID);
+                    next.Nodes = await Task.Run(() => GetLevel(temp.ID));
                     foreach (var item in next.Nodes)
-                        stack.Push(item);
+                        queue.Enqueue(item);
                 }
             }
         }
 
         private ObservableCollection<Node> GetLevel(int parentId)
         {
+            Thread.Sleep(500);
+
             ObservableCollection<Node> temp = new ObservableCollection<Node>();
 
             var folders = ClassDB.GetFolders(parentId);
@@ -258,7 +261,7 @@ namespace TestIT
                     (
                     addFileCommand = new Commands.RelayCommand(
                         p => AddFile(),
-                        p => true )
+                        p => IsSelectedItemFolder() )
                     );
             }
         }
@@ -449,7 +452,12 @@ namespace TestIT
         {
             //var t = SelectedItem;
             ClassDB.DeleteObject(SelectedItem.File);
-            Nodes.Remove(SelectedItem);
+            OpenedFiles.Remove(SelectedItem);
+            Node node = FindParentNode(Nodes, SelectedItem.File.FolderID);
+            if (node == null)
+                Nodes.Remove(SelectedItem);
+            else
+                node.Nodes.Remove(SelectedItem);
             SelectedItem = null;
         }
 
@@ -493,9 +501,14 @@ namespace TestIT
                     (
                     renameCommand = new Commands.RelayCommand(
                         p => Rename(),
-                        p => true)
+                        p => IsCanRename())
                     );
             }
+        }
+
+        private bool IsCanRename()
+        {
+            return SelectedItem != null;
         }
 
         private void Rename()
@@ -537,9 +550,30 @@ namespace TestIT
 
     public class Node : INotifyPropertyChanged
     {
-        //public IStorage Storage { get; set; }
-        public FolderM Folder { get; set; }
-        public FileM File { get; set; }
+        public FolderM folder;
+        public FolderM Folder
+        {
+            get { return folder; }
+            set
+            {
+                folder = value;
+                OnPropertyChanged();
+            }
+        }
+
+
+        public FileM file;
+        public FileM File
+        {
+            get { return file; }
+            set
+            {
+                file = value;
+                OnPropertyChanged();
+            }
+        }
+
+
 
         private FileExtensionM extension;
         public FileExtensionM Extension
@@ -553,7 +587,16 @@ namespace TestIT
         }
 
         //public bool IsSelected { get; set; }
-        public ObservableCollection<Node> Nodes { get; set; } = new ObservableCollection<Node>();
+        private ObservableCollection<Node> nodes = new ObservableCollection<Node>();
+        public ObservableCollection<Node> Nodes
+        {
+            get { return nodes; }
+            set
+            {
+                nodes = value;
+                OnPropertyChanged();
+            }
+        }
 
 
         public event PropertyChangedEventHandler PropertyChanged;

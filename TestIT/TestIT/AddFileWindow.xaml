@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:TestIT"
         xmlns:convert="clr-namespace:TestIT.Converter"
         mc:Ignorable="d"
-        Title="AddFileWindow" Height="300" Width="400" WindowStyle="None"
+        Title="AddFileWindow" Height="300" Width="450" WindowStyle="None"
         ResizeMode="NoResize" AllowsTransparency="True" BorderBrush="{StaticResource BlueBrush}" BorderThickness="1" 
         MouseLeftButtonDown="Window_MouseLeftButtonDown"  WindowStartupLocation="CenterScreen" >
     <Window.Resources>

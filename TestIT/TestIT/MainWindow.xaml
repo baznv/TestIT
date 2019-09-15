@@ -97,16 +97,19 @@
                                     <TextBlock.ToolTip>
                                         <ToolTip>
                                             <ToolTip.Style>
-                                                <Style TargetType="ToolTip">
+                                                <Style TargetType="ToolTip" BasedOn="{StaticResource {x:Type ToolTip}}">
                                                     <Setter Property="Visibility" Value="Visible"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding File}" Value="{x:Null}">
                                                             <Setter Property="Visibility" Value="Hidden"/>
                                                         </DataTrigger>
+                                                        <DataTrigger Binding="{Binding File.Description}" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Hidden"/>
+                                                        </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </ToolTip.Style>
-                                            <Label Content="{Binding File.Description}" FontSize="14"/>
+                                            <TextBlock Text="{Binding File.Description}" FontSize="14" TextWrapping="Wrap" MaxWidth="250" TextAlignment="Center"/>
                                         </ToolTip>
                                     </TextBlock.ToolTip>
                                     <TextBlock.Style>
